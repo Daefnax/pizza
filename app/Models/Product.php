@@ -32,4 +32,16 @@ class Product extends Model
     {
         return $this->hasMany(OrderItem::class);
     }
+
+    public function details()
+    {
+        return match ($this->type) {
+            'pizza' => $this->pizza(),
+            'drink' => $this->drink(),
+        };
+    }
+
+    protected $casts = [
+        'price' => 'decimal:2',
+    ];
 }
