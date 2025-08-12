@@ -2,10 +2,10 @@
 
 namespace App\Providers;
 
-use EloquentProductRepository;
+use App\Domain\Products\ProductRepositoryInterface;
+use App\Infrastructure\Persistence\Eloquent\EloquentProductRepository;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
-use ProductRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {

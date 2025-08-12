@@ -14,7 +14,7 @@ final class ProductController extends Controller
     public function index(Request $request)
     {
         $type = $request->query('type');
-        $per  = (int) $request->query('per_page', 2);
+        $per  = (int) $request->query('per_page', 20);
 
         $paginator = $this->repo->paginate($type, $per);
         return ProductResource::collection($paginator);

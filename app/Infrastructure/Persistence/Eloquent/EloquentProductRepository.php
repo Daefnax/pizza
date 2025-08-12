@@ -1,36 +1,40 @@
 <?php
 
 namespace App\Infrastructure\Persistence\Eloquent;
-use App\Domain\Product\ProductRepositoryInterface;
-use App\Models\Product;
-use Illuminate\Pagination\LengthAwarePaginator;
 
-final class EloquentProductRepository implements ProductRepositoryInterface
+use App\Domain\Products\ProductRepositoryInterface;
+use App\Models\Product;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+
+class EloquentProductRepository implements ProductRepositoryInterface
 
 {
 
     public function paginate(?string $type = null, int $perPage = 2): LengthAwarePaginator
     {
-        // TODO: Implement paginate() method.
+        return Product::query()->when($type, fn($query) => $query->where('type', $type))->orderByDesc('id')->paginate($perPage);
     }
 
-    public function find(int $id): ?\App\Models\Product
+    public function find(int $id): Product
     {
-        // TODO: Implement find() method.
+        return Product::findOrFail('id');
     }
 
-    public function create(\App\Models\Product $product): \App\Models\Product
+    public function create(array $data): Product
     {
-        // TODO: Implement create() method.
+        return Product::create($data);
     }
 
-    public function update(\App\Models\Product $product): \App\Models\Product
+    public function update(int $id, array $data): Product
     {
-        // TODO: Implement update() method.
+        $product = Product::findOrFail($id);
+        $product->update($data);
+        return $product;
     }
 
-    public function delete(int $id): bool
+    public function delete(int $id): void
     {
-        // TODO: Implement delete() method.
+        $product = Product::findOrFail($id);
+        $product->delete();
     }
 }
