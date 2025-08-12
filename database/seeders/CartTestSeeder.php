@@ -6,8 +6,8 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class CartTestSeeder extends Seeder
 {
@@ -20,7 +20,10 @@ class CartTestSeeder extends Seeder
 
         $user = User::updateOrCreate(
             ['email' => 'test@test.com'],
-            ['password' => 'test', 'is_admin' => false]
+            [
+                'password' => Hash::make('password'),
+                'is_admin' => false
+            ]
         );
 
         $cart = Cart::firstOrCreate(
@@ -34,9 +37,9 @@ class CartTestSeeder extends Seeder
 
         foreach ($products as $product) {
             CartItem::create([
-                'cart_id'    => $cart->id,
+                'cart_id' => $cart->id,
                 'product_id' => $product->id,
-                'quantity'   => 2,
+                'quantity' => 2,
             ]);
         }
 
