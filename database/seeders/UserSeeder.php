@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Cart;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -19,7 +20,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Admin',
                 'phone' => '123456789',
-                'password' => 'admin',
+                'password' => Hash::make('password'),
                 'is_admin' => true
             ]
         );
@@ -30,7 +31,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Costumer',
                 'phone' => '123456789',
-                'password' => 'user',
+                'password' => Hash::make('password'),
                 'is_admin' => false
             ]
         );

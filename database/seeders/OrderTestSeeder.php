@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class OrderTestSeeder extends Seeder
 {
@@ -22,7 +23,7 @@ class OrderTestSeeder extends Seeder
             [
                 'name' => 'Test Order',
                 'phone' => '123456789',
-                'password' => 'test',
+                'password' => Hash::make('password'),
                 'is_admin' => false,
             ]
         );
