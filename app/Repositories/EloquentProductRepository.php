@@ -1,8 +1,7 @@
 <?php
 
-namespace App\Infrastructure\Persistence\Eloquent;
+namespace App\Repositories;
 
-use App\Domain\Products\ProductRepositoryInterface;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
@@ -17,7 +16,7 @@ class EloquentProductRepository implements ProductRepositoryInterface
 
     public function find(int $id): Product
     {
-        return Product::findOrFail('id');
+        return Product::findOrFail($id);
     }
 
     public function create(array $data): Product

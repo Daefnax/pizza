@@ -2,26 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Domain\Products\ProductRepositoryInterface;
 use App\Http\Resources\ProductResource;
-use App\Models\Product;
+use App\Repositories\ProductRepositoryInterface;
 use Illuminate\Http\Request;
 
-final class ProductController extends Controller
+class ProductController extends Controller
 {
-    public function __construct(private ProductRepositoryInterface $repo) {}
+    public function __construct(private ProductRepositoryInterface $repo)
+    {
+    }
 
     public function index(Request $request)
     {
         $type = $request->query('type');
-        $per  = (int) $request->query('per_page', 20);
+        $per = (int)$request->query('per_page', 20);
 
         $paginator = $this->repo->paginate($type, $per);
         return ProductResource::collection($paginator);
     }
 
-    public function show(Product $product)
+    public function show(int $product )
     {
-        return new ProductResource($product);
+        $model = $this->repo->find($product);
+        abort_if(!$model, 404);
+
+        return new ProductResource($model);
     }
 }

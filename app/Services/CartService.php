@@ -1,134 +1,226 @@
 <?php
 
-namespace App\Application\Cart;
+namespace App\Services;
 
-use App\Domain\Cart\CartServiceInterface;
-use App\Domain\Cart\Exceptions\CartLimitException;
-use App\Domain\Cart\Exceptions\UnknownProductTypeException;
 use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Product;
+use App\Models\User;
+use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CartService implements CartServiceInterface
 {
-    private const LIMITS = [
-        'pizza' => 10,
-        'drink' => 20,
-    ];
-
-    public function getOrCreateForUser(int $id): Cart
+    public function get(User $user): array
     {
-        return Cart::firstOrCreate(['user_id' => $id]);
-    }
+        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+        $cart->load('items.product');
 
-    public function addItem(int $id, Product $product, int $quantity): Cart
-    {
-        if ($quantity <= 0) {
-            return $this->removeItem($id, $product);
+        $items = [];
+        $totalKop = 0;
+
+        foreach ($cart->items as $i) {
+            $priceStr = (string)($i->product?->price ?? '0.00');
+            $priceKop = $this->rubToKop($priceStr);
+            $qty = (int)$i->quantity;
+            $subtotalKop = $priceKop * $qty;
+
+            $items[] = [
+                'product_id' => $i->product_id,
+                'name' => $i->product?->name,
+                'quantity' => $qty,
+                'unit_price' => $this->kopToRub($priceKop),
+                'subtotal' => $this->kopToRub($subtotalKop),
+            ];
+
+            $totalKop += $subtotalKop;
         }
 
-        return DB::transaction(function () use ($id, $product, $qty) {
-            $cart = $this->getOrCreateWithLock($id);
+        return [
+            'id' => $cart->id,
+            'items' => $items,
+            'total' => $this->kopToRub($totalKop),
+        ];
+    }
 
-            $item = $cart->items()
+    public function add(User $user, int $product, int $quantity): array
+    {
+        if ($quantity < 1) {
+            throw ValidationException::withMessages(['quantity' => 'Минимум 1.']);
+        }
+
+        return DB::transaction(function () use ($user, $product, $quantity) {
+            $product = Product::query()
+                ->whereKey($product)
+                ->where('is_active', true)
+                ->first();
+
+            if (!$product) {
+                throw ValidationException::withMessages(['product_id' => 'Товар недоступен.']);
+            }
+
+            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+            $item = CartItem::query()
+                ->where('cart_id', $cart->id)
                 ->where('product_id', $product->id)
                 ->lockForUpdate()
                 ->first();
 
-            $newQty = $qty + ($item?->quantity ?? 0);
+            $counts = $this->countItemsByType($cart);
+            $type = $product->type;
 
-            $this->assertTypeLimitSql($cart->id, $product->type, $newQty, $product->id, false);
+            $currentQty = $item?->quantity ?? 0;
+            $newQty = $currentQty + $quantity;
+
+            if ($type === 'pizza' && ($counts['pizza'] - $currentQty + $newQty) > 10) {
+                throw ValidationException::withMessages(['quantity' => 'Максимум 10 пицц в корзине.']);
+            }
+            if ($type === 'drink' && ($counts['drink'] - $currentQty + $newQty) > 20) {
+                throw ValidationException::withMessages(['quantity' => 'Максимум 20 напитков в корзине.']);
+            }
 
             if ($item) {
-                $item->update(['quantity' => $newQty]);
+                $item->quantity = $newQty;
+                $item->save();
             } else {
-                $cart->items()->create([
+                CartItem::create([
+                    'cart_id' => $cart->id,
                     'product_id' => $product->id,
-                    'quantity'   => $qty,
+                    'quantity' => $quantity,
                 ]);
             }
 
-            return $cart->load('items.product');
+            return $this->get($user);
         });
     }
 
-    public function updateItem(int $id, Product $product, int $qty): Cart
+    public function update(User $user, int $product, int $quantity): array
     {
-        return DB::transaction(function () use ($id, $product, $qty) {
-            $cart = $this->getOrCreateWithLock($id);
+        if ($quantity < 0) {
+            throw ValidationException::withMessages(['quantity' => 'Не может быть отрицательным.']);
+        }
 
-            $item = $cart->items()
-                ->where('product_id', $product->id)
+        return DB::transaction(function () use ($user, $product, $quantity) {
+            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+            $item = CartItem::query()
+                ->where('cart_id', $cart->id)
+                ->where('product_id', $product)
                 ->lockForUpdate()
-                ->firstOrFail();
+                ->first();
 
-            if ($qty <= 0) {
-                $item->delete();
-                return $cart->load('items.product');
+            if (!$item) {
+                throw ValidationException::withMessages(['product_id' => 'Товар отсутствует в корзине.']);
             }
 
-            $this->assertTypeLimitSql($cart->id, $product->type, $qty, $product->id, true);
+            if ($quantity === 0) {
+                $item->delete();
+            } else {
+                $active = Product::query()
+                    ->whereKey($product)
+                    ->where('is_active', true)
+                    ->first();
 
-            $item->update(['quantity' => $qty]);
+                if (!$active) {
+                    throw ValidationException::withMessages(['product_id' => 'Товар недоступен.']);
+                }
 
-            return $cart->load('items.product');
+                $counts = $this->countItemsByType($cart);
+                $type = $active->type;
+
+                if ($type === 'pizza' && ($counts['pizza'] - $item->quantity + $quantity) > 10) {
+                    throw ValidationException::withMessages(['quantity' => 'Максимум 10 пицц в корзине.']);
+                }
+                if ($type === 'drink' && ($counts['drink'] - $item->quantity + $quantity) > 20) {
+                    throw ValidationException::withMessages(['quantity' => 'Максимум 20 напитков в корзине.']);
+                }
+
+                $item->quantity = $quantity;
+                $item->save();
+            }
+
+            return $this->get($user);
         });
     }
 
-    public function removeItem(int $id, Product $product): Cart
-    {
-        $cart = $this->getOrCreateWithLock($id);
-        $cart->items()->where('product_id', $product->id)->delete();
 
-        return $cart->load('items.product');
+    public function remove(User $user, int $product): array
+    {
+        return DB::transaction(function () use ($user, $product) {
+            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+            $qtyToRemove = (int)(app('request')->input('quantity', 0));
+            $item = CartItem::query()
+                ->where('cart_id', $cart->id)
+                ->where('product_id', $product)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$item) {
+                throw ValidationException::withMessages(['product_id' => 'Товар отсутствует в корзине.']);
+            }
+
+            if ($qtyToRemove < 1) {
+                $item->delete();
+            } else {
+                $newQty = $item->quantity - $qtyToRemove;
+                if ($newQty <= 0) {
+                    $item->delete();
+                } else {
+                    $item->quantity = $newQty;
+                    $item->save();
+                }
+            }
+
+            return $this->get($user);
+        });
     }
 
-    public function clear(int $id): Cart
+    public function clear(User $user): array
     {
-        $cart = $this->getOrCreateWithLock($id);
-        $cart->items()->delete();
-
-        return $cart->load('items.product');
+        return DB::transaction(function () use ($user) {
+            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+            CartItem::where('cart_id', $cart->id)->delete();
+            return $this->get($user);
+        });
     }
 
-    private function getOrCreateWithLock(int $id): Cart
+    private function rubToKop(string $amount): int
     {
-        return Cart::where('user_id', $id)
-            ->lockForUpdate()
-            ->first() ?? Cart::create(['user_id' => $id]);
+        $s = str_replace([' ', "\u{00A0}", ','], ['', '', '.'], trim($amount));
+        $neg = str_starts_with($s, '-');
+        if ($neg) {
+            $s = substr($s, 1);
+        }
+        [$r, $k] = array_pad(explode('.', $s, 2), 2, '0');
+        $r = preg_replace('/\D/', '', $r);
+        $k = substr(preg_replace('/\D/', '', $k) . '00', 0, 2);
+        $v = (int)$r * 100 + (int)$k;
+        return $neg ? -$v : $v;
     }
 
-    private function assertTypeLimitSql(
-        int $cartId,
-        string $type,
-        int $candidateQty,
-        int $productId,
-        bool $isReplace
-    ): void {
-        $limit = self::LIMITS[$type] ?? null;
-        if ($limit === null) {
-            throw new UnknownProductTypeException("Неизвестный тип продукта: {$type}");
+    private function kopToRub(int $kop): string
+    {
+        $neg = $kop < 0;
+        $kop = abs($kop);
+        return ($neg ? '-' : '') . intdiv($kop, 100) . '.' . str_pad((string)($kop % 100), 2, '0', STR_PAD_LEFT);
+    }
+
+    public function countItemsByType(Cart $cart): array
+    {
+        $cart->load('items.product');
+
+        $counts = [
+            'pizza' => 0,
+            'drink' => 0,
+        ];
+
+        foreach ($cart->items as $item) {
+            $type = $item->product?->type;
+            if ($type && isset($counts[$type])) {
+                $counts[$type] += $item->quantity;
+            }
         }
 
-        $query = DB::table('cart_items as ci')
-            ->join('products as p', 'p.id', '=', 'ci.product_id')
-            ->where('ci.cart_id', $cartId)
-            ->where('p.type', $type);
-
-        if ($isReplace) {
-            $query->where('ci.product_id', '<>', $productId);
-        }
-
-        $currentSum = (int) $query->lockForUpdate()->sum('ci.quantity');
-
-        $newTotal = $currentSum + $candidateQty;
-
-        if ($newTotal > $limit) {
-            throw new CartLimitException("Лимит по типу {$type} превышен: {$newTotal} > {$limit}");
-        }
-    }
-
-    public function getCartForUser($id)
-    {
+        return $counts;
     }
 }

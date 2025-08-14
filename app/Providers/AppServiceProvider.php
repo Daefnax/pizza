@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
-use App\Domain\Products\ProductRepositoryInterface;
-use App\Infrastructure\Persistence\Eloquent\EloquentProductRepository;
+
+use App\Repositories\EloquentProductRepository;
+use App\Repositories\ProductRepositoryInterface;
+use App\Services\CartService;
+use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,6 +18,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ProductRepositoryInterface::class, EloquentProductRepository::class);
+        $this->app->bind(CartServiceInterface::class, CartService::class);
     }
 
     /**

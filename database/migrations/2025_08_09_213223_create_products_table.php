@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->enum('type', ['pizza', 'drink'])->index();
             $table->decimal('price', 10, 2);
+            $table->boolean('is_active')->default(true)->index();
             $table->timestamps();
             $table->unique(['name', 'type']);
         });
@@ -26,6 +27,10 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::dropIfExists('products');{}
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropIndex(['is_active']);
+            $table->dropColumn('is_active');
+        });
     }
 };

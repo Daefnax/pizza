@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Domain\Products\ProductRepositoryInterface;
 use App\Http\Controllers\Controller;
+use App\Repositories\ProductRepositoryInterface;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller

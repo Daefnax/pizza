@@ -6,22 +6,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Cart extends Model
 {
+    protected $fillable = ['user_id'];
     public function user()
     {
         return $this->belongsTo(User::class);
     }
     public function items()
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(CartItem::class);
     }
 
-    public function getTotalPriceAttribute()
+    public function products()
     {
-        $total = $this->items()
-            ->join('products', 'products.id', '=', 'cart_items.product_id')
-            ->selectRaw('SUM(cart_items.quantity * products.price) as total_price')
-            ->value('total_price') ?? '0.00';
-
-        return number_format((float)$total, 2, '.', '');
+        return $this->belongsToMany(Product::class, 'cart_items')->withPivot('quantity')->withTimestamps();
     }
 }

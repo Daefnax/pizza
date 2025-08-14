@@ -10,15 +10,13 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-// User Registration
     public function register(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'password_confirmation' => 'required|string|min:6',
+            'password' => 'required|string|min:6',
         ]);
         $user = User::create([
             'name' => $request->name,
@@ -30,7 +28,11 @@ class AuthController extends Controller
         return response()->json(['token' => $token], 201);
     }
 
-// User Login
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
     public function login(Request $request)
     {
         $credentials = $request->only('email', 'password');
@@ -40,14 +42,12 @@ class AuthController extends Controller
         return response()->json(['token' => $token]);
     }
 
-// Logout User (Invalidate Token)
     public function logout()
     {
         Auth::logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-// Get Authenticated User
     public function me()
     {
         return response()->json(Auth::user());

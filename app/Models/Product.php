@@ -13,14 +13,9 @@ class Product extends Model
             'price',
         ];
 
-    public function pizza()
+    public function carts()
     {
-        return $this->hasOne(Pizza::class);
-    }
-
-    public function drink()
-    {
-        return $this->hasOne(Drink::class);
+        return $this->belongsToMany(Cart::class, 'cart_items')->withPivot('quantity')->withTimestamps();
     }
 
     public function cartItems()
