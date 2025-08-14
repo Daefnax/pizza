@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::middleware('auth:api')->group(function () {
     Route::put('cart/items/{product}', [CartController::class, 'update']);
     Route::delete('cart/items/{product}', [CartController::class, 'remove']);
     Route::delete('cart', [CartController::class, 'clear']);
+
+    Route::post('/orders', [OrderController::class, 'store']);
+    Route::get('/orders', [OrderController::class, 'index']);
 });
 
 Route::prefix('admin')
