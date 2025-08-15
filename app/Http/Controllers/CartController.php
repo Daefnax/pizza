@@ -2,8 +2,6 @@
 
 namespace App\Http\Controllers;
 
-
-
 use App\Http\Requests\CartAddItemRequest;
 use App\Http\Requests\CartUpdateItemRequest;
 use App\Services\Contracts\CartServiceInterface;
@@ -11,7 +9,9 @@ use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    public function __construct(private CartServiceInterface $cart) {}
+    public function __construct(private CartServiceInterface $cart)
+    {
+    }
 
     public function show(Request $request)
     {

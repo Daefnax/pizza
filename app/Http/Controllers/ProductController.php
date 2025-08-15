@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ProductController extends Controller
 {
-    public function __construct(private ProductRepositoryInterface $repo)
+    public function __construct(private ProductRepositoryInterface $products)
     {
     }
 
@@ -17,13 +17,13 @@ class ProductController extends Controller
         $type = $request->query('type');
         $per = (int)$request->query('per_page', 20);
 
-        $paginator = $this->repo->paginate($type, $per);
+        $paginator = $this->products->paginate($type, $per);
         return ProductResource::collection($paginator);
     }
 
     public function show(int $product )
     {
-        $model = $this->repo->find($product);
+        $model = $this->products->find($product);
         abort_if(!$model, 404);
 
         return new ProductResource($model);

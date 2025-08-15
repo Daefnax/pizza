@@ -3,14 +3,17 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
+    use SoftDeletes;
     protected $fillable =
         [
             'name',
             'type',
             'price',
+            'is_active'
         ];
 
     public function carts()
@@ -37,6 +40,7 @@ class Product extends Model
     }
 
     protected $casts = [
+        'is_active' => 'bool',
         'price' => 'decimal:2',
     ];
 }

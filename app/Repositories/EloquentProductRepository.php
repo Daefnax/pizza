@@ -2,8 +2,10 @@
 
 namespace App\Repositories;
 
+use App\Models\OrderItem;
 use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class EloquentProductRepository implements ProductRepositoryInterface
 
@@ -31,9 +33,41 @@ class EloquentProductRepository implements ProductRepositoryInterface
         return $product;
     }
 
-    public function delete(int $id): void
+    public function archive(int $id): bool
     {
-        $product = Product::findOrFail($id);
-        $product->delete();
+        return DB::transaction(function () use ($id) {
+            /** @var Product|null $product */
+            $product = Product::find($id);
+            if (!$product) {
+                return false;
+            }
+
+            $product->is_active = false;
+            $product->save();
+
+            $product->delete();
+            return true;
+        });
+    }
+
+    public function forceDeleteIfNoReferences(int $id): bool
+    {
+        return DB::transaction(function () use ($id) {
+            /** @var Product|null $product */
+            $product = Product::withTrashed()->find($id);
+            if (!$product) {
+                return false;
+            }
+
+            $hasReferences = OrderItem::query()
+                ->where('product_id', $id)
+                ->exists();
+
+            if ($hasReferences) {
+                return false;
+            }
+
+            return (bool) $product->forceDelete();
+        });
     }
 }

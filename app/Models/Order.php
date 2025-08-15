@@ -6,11 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
 {
-    public const STATUS_NEW = 'new';
-    public const STATUS_IN_PROGRESS = 'in_progress';
-    public const STATUS_DELIVERING = 'delivering';
-    public const STATUS_DELIVERED = 'delivered';
-    public const STATUS_CANCELED = 'canceled';
+    public const ALLOWED = [
+        'pending',
+        'processing',
+        'completed',
+        'cancelled',
+    ];
 
     protected $fillable = ['user_id', 'status', 'customer_email', 'customer_phone', 'customer_address', 'delivery_time', 'total',
     ];

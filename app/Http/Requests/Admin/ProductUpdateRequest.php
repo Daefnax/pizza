@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Admin;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class ProductUpdateRequest extends FormRequest
 {
@@ -12,7 +11,7 @@ class ProductUpdateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return (bool) $this->user()?->is_admin;
     }
 
     /**
@@ -22,24 +21,30 @@ class ProductUpdateRequest extends FormRequest
      */
     public function rules(): array
     {
-        $product = $this->route('product');
-        $type = $this->input('type', $product?->type);
-
         return [
-            'name' => [
-                'required',
-                'string',
-                'max:255',
-                'min:3',
-                Rule::unique('products', 'name')
-                    ->where(fn($query) => $query->where('type', $this->input('type'))),
-            ],
-            'type' => [
-                'required', Rule::in(['pizza', 'drink']),
-            ],
-            'price' => [
-                'required|numeric|min:1|max:10000000',
-            ]
+            'name'        => ['sometimes', 'required', 'string', 'max:255'],
+            'type'        => ['sometimes', 'required', 'in:pizza,drink'],
+            'price'       => ['sometimes', 'required', 'numeric', 'min:0'],
+            'is_active'   => ['sometimes', 'required', 'boolean'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required'      => 'Название товара обязательно.',
+            'name.string'        => 'Название должно быть строкой.',
+            'name.max'           => 'Название не должно превышать :max символов.',
+
+            'type.required'      => 'Тип товара обязателен.',
+            'type.in'            => 'Тип товара должен быть либо "pizza", либо "drink".',
+
+            'price.required'     => 'Цена обязательна.',
+            'price.numeric'      => 'Цена должна быть числом.',
+            'price.min'          => 'Цена не может быть меньше :min.',
+
+            'is_active.required' => 'Статус активности обязателен.',
+            'is_active.boolean'  => 'Статус активности должен быть булевым значением.'
         ];
     }
 }
