@@ -2,51 +2,60 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\CartAddItemRequest;
-use App\Http\Requests\CartUpdateItemRequest;
+use App\Http\Requests\Cart\CartAddItemRequest;
+use App\Http\Requests\Cart\CartRemoveItemRequest;
+use App\Http\Requests\Cart\CartUpdateItemRequest;
+use App\Http\Resources\CartResource;
 use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
-    public function __construct(private CartServiceInterface $cart)
+    public function __construct(private CartServiceInterface $cartService)
     {
     }
 
-    public function show(Request $request)
+    public function show(Request $request): CartResource
     {
-        return response()->json($this->cart->get($request->user()));
+        return new CartResource($this->cartService->get($request->user()));
     }
 
-    public function add(CartAddItemRequest $request)
+    public function add(CartAddItemRequest $request): CartResource
     {
-        $data = $this->cart->add(
+        $cart = $this->cartService->add(
             $request->user(),
-            (int)$request->integer('product_id'),
-            (int)$request->integer('quantity')
+            $request->integer('product_id'),
+            $request->integer('quantity')
         );
-        return response()->json($data, 200);
+        return new CartResource($cart);
     }
 
-    public function update($productId, CartUpdateItemRequest $request)
+    public function update(int $productId, CartUpdateItemRequest $request): CartResource
     {
-        $data = $this->cart->update(
+        $cart = $this->cartService->update(
             $request->user(),
-            (int)$productId,
-            (int)$request->integer('quantity')
+            $productId,
+            $request->integer('quantity')
         );
-        return response()->json($data);
+
+        return new CartResource($cart);
     }
 
-    public function remove($productId, Request $request)
+    public function remove(int $productId, CartRemoveItemRequest $request): CartResource
     {
-        $data = $this->cart->remove($request->user(), (int)$productId);
-        return response()->json($data);
+        $quantity = $request->has('quantity') ? $request->integer('quantity') : null;
+
+        $cart = $this->cartService->remove(
+            $request->user(),
+            $productId,
+            $quantity
+        );
+
+        return new CartResource($cart);
     }
 
-    public function clear(Request $request)
+    public function clear(Request $request): CartResource
     {
-        $data = $this->cart->clear($request->user());
-        return response()->json($data);
+        return new CartResource($this->cartService->clear($request->user()));
     }
 }

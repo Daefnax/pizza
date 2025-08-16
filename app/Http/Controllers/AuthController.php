@@ -2,53 +2,50 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
+use App\Http\Resources\UserResource;
 use App\Models\User;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request): JsonResponse
     {
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-        ]);
+        $data = $request->validated();
+
         $user = User::create([
-            'name' => $request->name,
-            'phone' => $request->phone,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
+            'name' => $data->name,
+            'phone' => $data->phone,
+            'email' => $data->email,
+            'password' => Hash::make($data->password),
         ]);
         $token = JWTAuth::fromUser($user);
-        return response()->json(['token' => $token], 201);
+        return response()->json([
+            'token' => $token,
+            'user' => new UserResource($user)
+        ], 201);
     }
 
-    public function showLoginForm()
-    {
-        return view('auth.login');
-    }
-
-    public function login(Request $request)
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only('email', 'password');
         if (!$token = Auth::attempt($credentials)) {
-            return response()->json(['error' => 'Invalid credentials'], 401);
+            return response()->json(['message' => 'Invalid credentials'], 401);
         }
         return response()->json(['token' => $token]);
     }
 
-    public function logout()
+    public function logout(): JsonResponse
     {
         Auth::logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
 
-    public function me()
+    public function me(): JsonResponse
     {
         return response()->json(Auth::user());
     }

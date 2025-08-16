@@ -2,30 +2,38 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\IndexProductsRequest;
 use App\Http\Resources\ProductResource;
-use App\Repositories\ProductRepositoryInterface;
-use Illuminate\Http\Request;
+use App\Models\Product;
+use Illuminate\Http\JsonResponse;
 
 class ProductController extends Controller
 {
-    public function __construct(private ProductRepositoryInterface $products)
+    public function index(IndexProductsRequest $request): JsonResponse
     {
+        $validatedData = $request->validated();
+
+        $type = $validatedData['type'] ?? null;
+        $perPage = $validatedData['per_page'] ?? 20;
+
+        $query = Product::query()
+            ->where('is_active', true)
+            ->when($type, fn($query) => $query->where('type', $type))
+            ->orderByDesc('id');
+
+        $paginator = $query
+            ->paginate($perPage)
+            ->withQueryString();
+
+        return ProductResource::collection($paginator)->response();
     }
 
-    public function index(Request $request)
+    public function show(int $productId): JsonResponse
     {
-        $type = $request->query('type');
-        $per = (int)$request->query('per_page', 20);
+        $productModel = Product::query()
+            ->where('is_active', true)
+            ->findOrFail($productId);
 
-        $paginator = $this->products->paginate($type, $per);
-        return ProductResource::collection($paginator);
-    }
-
-    public function show(int $product )
-    {
-        $model = $this->products->find($product);
-        abort_if(!$model, 404);
-
-        return new ProductResource($model);
+        return (new ProductResource($productModel))->response();
     }
 }

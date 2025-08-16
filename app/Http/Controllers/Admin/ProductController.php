@@ -4,99 +4,86 @@ namespace App\Http\Controllers\Admin;
 
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\ProductStoreRequest;
-use App\Http\Requests\Admin\ProductUpdateRequest;
+use App\Http\Requests\Admin\IndexProductsRequest;
+use App\Http\Requests\Admin\StoreProductsRequest;
+use App\Http\Requests\Admin\UpdateProductsRequest;
 use App\Http\Resources\ProductResource;
-use App\Models\OrderItem;
 use App\Repositories\ProductRepositoryInterface;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
-
-    public function __construct(private ProductRepositoryInterface $products)
+    public function __construct(private ProductRepositoryInterface $productRepository)
     {
     }
 
-    public function index(Request $request): JsonResponse
+    public function index(IndexProductsRequest $request): JsonResponse
     {
-        $type = $request->string('type')->toString() ?: null;
-        $perPage = (int)$request->query('per_page', 20);
-        $search = $request->string('q')->toString() ?: null;
+        $validatedData = $request->validated();
 
-        $paginator = $this->products->paginate($type, $perPage, $search);
+        $type = $validatedData['type'] ?? null;
+        $perPage = $validatedData['per_page'] ?? 20;
+
+        $paginator = $this->productRepository->paginate($type, $perPage);
 
         return ProductResource::collection($paginator)->response();
     }
 
-    public function show(int $product): JsonResponse
+    public function show(int $productId): JsonResponse
     {
-        $model = $this->products->find($product);
-        abort_if(!$model, 404);
-
-        return (new ProductResource($model))->response();
+        $productModel = $this->productRepository->findOrFail($productId);
+        return (new ProductResource($productModel))->response();
     }
 
-    public function store(ProductStoreRequest $request): JsonResponse
+    public function store(StoreProductsRequest $request): JsonResponse
     {
-        $data = $request->validated();
-        $model = $this->products->create($data);
+        $productModel = $this->productRepository->create($request->validated());
 
-        return (new ProductResource($model))
+        return (new ProductResource($productModel))
             ->response()
             ->setStatusCode(Response::HTTP_CREATED);
     }
 
-    public function update(ProductUpdateRequest $request, int $product): JsonResponse
+    public function update(UpdateProductsRequest $request, int $productId): JsonResponse
     {
-        $data = $request->validated();
-
-        $ok = $this->products->update($product, $data);
-        abort_if(!$ok, 404);
-
-        $model = $this->products->find($product);
-
-        return (new ProductResource($model))->response();
+        $productModel = $this->productRepository->update($productId, $request->validated());
+        return (new ProductResource($productModel))->response();
     }
 
-    public function destroy(int $product): JsonResponse
+    public function destroy(int $productId): JsonResponse
     {
-        $model = $this->products->find($product);
-        abort_if(!$model, 404);
+        $result = $this->productRepository->deactivateOrArchive($productId);
 
-        $inOrders = OrderItem::query()->where('product_id', $product)->exists();
-
-        if ($inOrders) {
-            $this->products->update($product, ['is_active' => false]);
-            $fresh = $this->products->find($product);
-
-            return response()->json([
-                'deleted'    => false,
-                'deactivated'=> true,
-                'product'    => [
-                    'id'        => $fresh->id,
-                    'is_active' => (bool) $fresh->is_active,
-                ],
-            ], 200);
+        if (!$result['found']) {
+            abort(Response::HTTP_NOT_FOUND);
         }
 
-        $ok = $this->products->archive($product);
-        abort_if(!$ok, 404);
+        if ($result['deactivated']) {
+            $freshModel = $this->productRepository->findOrFail($productId);
 
-        return response()->json(['deleted' => true], 200);
+            return response()->json([
+                'deleted' => false,
+                'deactivated' => true,
+                'product' => [
+                    'id' => $freshModel->id,
+                    'is_active' => (bool)$freshModel->is_active,
+                ],
+            ], Response::HTTP_OK);
+        }
+
+        return response()->json(['deleted' => true], Response::HTTP_OK);
     }
 
-    public function toggle(int $product): JsonResponse
+    public function toggle(int $productId): JsonResponse
     {
-        $model = $this->products->find($product);
-        abort_if(!$model, 404);
+        $productModel = $this->productRepository->findOrFail($productId);
 
-        $this->products->update($product, ['is_active' => !$model->is_active]);
+        $updatedModel = $this->productRepository->update($productId, [
+            'is_active' => !$productModel->is_active,
+        ]);
 
-        $model = $this->products->find($product);
-
-        return (new ProductResource($model))->response();
+        return (new ProductResource($updatedModel))->response();
     }
 }
+

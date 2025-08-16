@@ -7,7 +7,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
+    public const TYPES = ['pizza', 'drink'];
+
     use SoftDeletes;
+
     protected $fillable =
         [
             'name',
@@ -29,14 +32,6 @@ class Product extends Model
     public function orderItems()
     {
         return $this->hasMany(OrderItem::class);
-    }
-
-    public function details()
-    {
-        return match ($this->type) {
-            'pizza' => $this->pizza(),
-            'drink' => $this->drink(),
-        };
     }
 
     protected $casts = [

@@ -8,17 +8,19 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
 class EloquentProductRepository implements ProductRepositoryInterface
-
 {
-
-    public function paginate(?string $type = null, int $perPage = 2): LengthAwarePaginator
+    public function paginate(?string $type = null, int $perPage = 20): LengthAwarePaginator
     {
-        return Product::query()->when($type, fn($query) => $query->where('type', $type))->orderByDesc('id')->paginate($perPage);
+        return Product::query()
+            ->when($type, fn($query) => $query->where('type', $type))
+            ->orderByDesc('id')
+            ->paginate($perPage)
+            ->withQueryString();
     }
 
-    public function find(int $id): Product
+    public function findOrFail(int $id): Product
     {
-        return Product::findOrFail($id);
+        return Product::query()->findOrFail($id);
     }
 
     public function create(array $data): Product
@@ -28,23 +30,20 @@ class EloquentProductRepository implements ProductRepositoryInterface
 
     public function update(int $id, array $data): Product
     {
-        $product = Product::findOrFail($id);
+        $product = $this->findOrFail($id);
         $product->update($data);
-        return $product;
+        return $product->refresh();
     }
 
     public function archive(int $id): bool
     {
         return DB::transaction(function () use ($id) {
-            /** @var Product|null $product */
-            $product = Product::find($id);
+            $product = Product::query()->find($id);
             if (!$product) {
                 return false;
             }
-
             $product->is_active = false;
             $product->save();
-
             $product->delete();
             return true;
         });
@@ -53,7 +52,6 @@ class EloquentProductRepository implements ProductRepositoryInterface
     public function forceDeleteIfNoReferences(int $id): bool
     {
         return DB::transaction(function () use ($id) {
-            /** @var Product|null $product */
             $product = Product::withTrashed()->find($id);
             if (!$product) {
                 return false;
@@ -67,7 +65,34 @@ class EloquentProductRepository implements ProductRepositoryInterface
                 return false;
             }
 
-            return (bool) $product->forceDelete();
+            return (bool)$product->forceDelete();
+        });
+    }
+
+    public function deactivateOrArchive(int $id): array
+    {
+        return DB::transaction(function () use ($id) {
+            $product = Product::query()->find($id);
+            if (!$product) {
+                return ['found' => false, 'deactivated' => false, 'archived' => false];
+            }
+
+            $hasReferences = OrderItem::query()
+                ->where('product_id', $id)
+                ->exists();
+
+            if ($hasReferences) {
+                $product->is_active = false;
+                $product->save();
+
+                return ['found' => true, 'deactivated' => true, 'archived' => false];
+            }
+
+            $product->is_active = false;
+            $product->save();
+            $product->delete();
+
+            return ['found' => true, 'deactivated' => false, 'archived' => true];
         });
     }
 }

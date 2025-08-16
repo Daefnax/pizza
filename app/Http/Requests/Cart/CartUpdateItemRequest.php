@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\Cart;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class CartAddItemRequest extends FormRequest
+class CartUpdateItemRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,17 +22,13 @@ class CartAddItemRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'product_id' => ['required', 'integer', Rule::exists('products', 'id')],
-            'quantity'   => ['required', 'integer', 'min:1', 'max:20'],
+            'quantity' => ['required', 'integer', 'min:1', 'max:20']
         ];
     }
 
     public function messages(): array
     {
         return [
-            'product_id.required' => 'product_id обязателен.',
-            'product_id.integer' => 'product_id должен быть целым числом.',
-            'product_id.exists' => 'Товар не найден.',
             'quantity.required' => 'quantity обязателен.',
             'quantity.integer' => 'quantity должен быть целым числом.',
             'quantity.min' => 'Минимум 1.',

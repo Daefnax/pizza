@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,7 @@ return new class extends Migration
         Schema::create('products', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('type', ['pizza', 'drink'])->index();
+            $table->enum('type', Product::TYPES)->index();
             $table->decimal('price', 10, 2);
             $table->boolean('is_active')->default(true)->index();
             $table->timestamps();

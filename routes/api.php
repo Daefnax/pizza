@@ -29,18 +29,20 @@ Route::middleware('auth:api')->group(function () {
 
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders', [OrderController::class, 'index']);
+
+    Route::middleware('can:admin')
+        ->prefix('admin')
+        ->group(function () {
+            Route::get('products', [AdminProduct::class, 'index'])->name('products.index');
+            Route::post('products', [AdminProduct::class, 'store'])->name('products.store');
+            Route::get('products/{product}', [AdminProduct::class, 'show'])->name('products.show');
+            Route::put('products/{product}', [AdminProduct::class, 'update'])->name('products.update');
+            Route::delete('products/{product}', [AdminProduct::class, 'destroy'])->name('products.destroy');
+            Route::patch('products/{product}/toggle', [AdminProduct::class, 'toggle'])->name('products.toggle');
+
+            Route::get('orders', [AdminOrder::class, 'index'])->name('orders.index');
+            Route::patch('orders/{order}/status', [AdminOrder::class, 'updateStatus'])->name('orders.updateStatus');
+        });
+
 });
 
-Route::middleware(['auth:api', 'can:admin'])
-    ->prefix('admin')
-    ->group(function () {
-        Route::get('products',                 [AdminProduct::class, 'index'])->name('products.index');
-        Route::post('products',                [AdminProduct::class, 'store'])->name('products.store');
-        Route::get('products/{product}',       [AdminProduct::class, 'show'])->name('products.show');
-        Route::put('products/{product}',       [AdminProduct::class, 'update'])->name('products.update');
-        Route::delete('products/{product}',    [AdminProduct::class, 'destroy'])->name('products.destroy');
-        Route::patch('products/{product}/toggle', [AdminProduct::class, 'toggle'])->name('products.toggle');
-
-        Route::get('orders',                   [AdminOrder::class, 'index'])->name('orders.index');
-        Route::patch('orders/{order}/status',  [AdminOrder::class, 'updateStatus'])->name('orders.updateStatus');
-    });

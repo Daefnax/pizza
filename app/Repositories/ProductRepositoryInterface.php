@@ -9,7 +9,7 @@ interface ProductRepositoryInterface
 {
     public function paginate(?string $type = null, int $perPage = 20): LengthAwarePaginator;
 
-    public function find(int $id): Product;
+    public function findOrFail(int $id): Product;
 
     public function create(array $data): Product;
 
@@ -18,4 +18,6 @@ interface ProductRepositoryInterface
     public function archive(int $id): bool;
 
     public function forceDeleteIfNoReferences(int $id): bool;
+
+    public function deactivateOrArchive(int $id): array;
 }

@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
+use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class ProductUpdateRequest extends FormRequest
+class UpdateProductsRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,10 +24,10 @@ class ProductUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'        => ['sometimes', 'required', 'string', 'max:255'],
-            'type'        => ['sometimes', 'required', 'in:pizza,drink'],
-            'price'       => ['sometimes', 'required', 'numeric', 'min:0'],
-            'is_active'   => ['sometimes', 'required', 'boolean'],
+            'name'      => ['sometimes','required','string','max:255'],
+            'type'      => ['sometimes','required', Rule::in(Product::TYPES)],
+            'price'     => ['sometimes','required','numeric','min:0'],
+            'is_active' => ['sometimes','required','boolean'],
         ];
     }
 

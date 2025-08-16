@@ -19,6 +19,7 @@ class ProductResource extends JsonResource
             'name' => $this->name,
             'type' => $this->type,
             'price' => (string)$this->price,
+            'is_active' => (bool) $this->is_active,
             'created_at' => optional($this->created_at)->toISOString(),
             'updated_at' => optional($this->updated_at)->toISOString(),
         ];

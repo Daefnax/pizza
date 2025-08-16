@@ -12,77 +12,40 @@ use Illuminate\Validation\ValidationException;
 
 class CartService implements CartServiceInterface
 {
-    public function get(User $user): array
+    private const LIMITS = [
+        'pizza' => 10,
+        'drink' => 20,
+    ];
+
+    public function get(User $user): Cart
     {
-        $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-        $cart->load('items.product');
-
-        $items = [];
-        $totalKop = 0;
-
-        foreach ($cart->items as $i) {
-            $priceStr = (string)($i->product?->price ?? '0.00');
-            $priceKop = $this->rubToKop($priceStr);
-            $qty = (int)$i->quantity;
-            $subtotalKop = $priceKop * $qty;
-
-            $items[] = [
-                'product_id' => $i->product_id,
-                'name' => $i->product?->name,
-                'quantity' => $qty,
-                'unit_price' => $this->kopToRub($priceKop),
-                'subtotal' => $this->kopToRub($subtotalKop),
-            ];
-
-            $totalKop += $subtotalKop;
-        }
-
-        return [
-            'id' => $cart->id,
-            'items' => $items,
-            'total' => $this->kopToRub($totalKop),
-        ];
+        return Cart::with('items.product')->firstOrCreate(['user_id' => $user->id]);
     }
 
-    public function add(User $user, int $product, int $quantity): array
+    public function add(User $user, int $productId, int $quantity): Cart
     {
         if ($quantity < 1) {
             throw ValidationException::withMessages(['quantity' => 'Минимум 1.']);
         }
 
-        return DB::transaction(function () use ($user, $product, $quantity) {
-            $product = Product::query()
-                ->whereKey($product)
-                ->where('is_active', true)
-                ->first();
+        return DB::transaction(function () use ($user, $productId, $quantity) {
+            $product = $this->getActiveProduct($productId);
 
-            if (!$product) {
-                throw ValidationException::withMessages(['product_id' => 'Товар недоступен.']);
-            }
+            $cart = $this->getOrCreateCart($user);
 
-            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-            $item = CartItem::query()
-                ->where('cart_id', $cart->id)
-                ->where('product_id', $product->id)
-                ->lockForUpdate()
-                ->first();
+            $existingItem = $this->findCartItem($cart, $product->id);
+            $currentQuantity = $existingItem?->quantity ?? 0;
+            $newQuantity = $currentQuantity + $quantity;
 
-            $counts = $this->countItemsByType($cart);
-            $type = $product->type;
+            $this->validateQuantityLimit(
+                cart: $cart,
+                type: $product->type,
+                newQuantity: $newQuantity,
+                previousQuantity: $currentQuantity
+            );
 
-            $currentQty = $item?->quantity ?? 0;
-            $newQty = $currentQty + $quantity;
-
-            if ($type === 'pizza' && ($counts['pizza'] - $currentQty + $newQty) > 10) {
-                throw ValidationException::withMessages(['quantity' => 'Максимум 10 пицц в корзине.']);
-            }
-            if ($type === 'drink' && ($counts['drink'] - $currentQty + $newQty) > 20) {
-                throw ValidationException::withMessages(['quantity' => 'Максимум 20 напитков в корзине.']);
-            }
-
-            if ($item) {
-                $item->quantity = $newQty;
-                $item->save();
+            if ($existingItem) {
+                $existingItem->update(['quantity' => $newQuantity]);
             } else {
                 CartItem::create([
                     'cart_id' => $cart->id,
@@ -95,48 +58,34 @@ class CartService implements CartServiceInterface
         });
     }
 
-    public function update(User $user, int $product, int $quantity): array
+    public function update(User $user, int $productId, int $quantity): Cart
     {
         if ($quantity < 0) {
             throw ValidationException::withMessages(['quantity' => 'Не может быть отрицательным.']);
         }
 
-        return DB::transaction(function () use ($user, $product, $quantity) {
-            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-            $item = CartItem::query()
-                ->where('cart_id', $cart->id)
-                ->where('product_id', $product)
-                ->lockForUpdate()
-                ->first();
+        return DB::transaction(function () use ($user, $productId, $quantity) {
+            $cart = $this->getOrCreateCart($user);
 
-            if (!$item) {
+            $existingItem = $this->findCartItem($cart, $productId);
+
+            if (!$existingItem) {
                 throw ValidationException::withMessages(['product_id' => 'Товар отсутствует в корзине.']);
             }
 
             if ($quantity === 0) {
-                $item->delete();
+                $existingItem->delete();
             } else {
-                $active = Product::query()
-                    ->whereKey($product)
-                    ->where('is_active', true)
-                    ->first();
+                $product = $this->getActiveProduct($productId);
 
-                if (!$active) {
-                    throw ValidationException::withMessages(['product_id' => 'Товар недоступен.']);
-                }
+                $this->validateQuantityLimit(
+                    cart: $cart,
+                    type: $product->type,
+                    newQuantity: $quantity,
+                    previousQuantity: $existingItem->quantity
+                );
 
-                $counts = $this->countItemsByType($cart);
-                $type = $active->type;
-
-                if ($type === 'pizza' && ($counts['pizza'] - $item->quantity + $quantity) > 10) {
-                    throw ValidationException::withMessages(['quantity' => 'Максимум 10 пицц в корзине.']);
-                }
-                if ($type === 'drink' && ($counts['drink'] - $item->quantity + $quantity) > 20) {
-                    throw ValidationException::withMessages(['quantity' => 'Максимум 20 напитков в корзине.']);
-                }
-
-                $item->quantity = $quantity;
-                $item->save();
+                $existingItem->update(['quantity' => $quantity]);
             }
 
             return $this->get($user);
@@ -144,83 +93,87 @@ class CartService implements CartServiceInterface
     }
 
 
-    public function remove(User $user, int $product): array
+    public function remove(User $user, int $productId, ?int $quantity = null): Cart
     {
-        return DB::transaction(function () use ($user, $product) {
-            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
-            $qtyToRemove = (int)(app('request')->input('quantity', 0));
-            $item = CartItem::query()
-                ->where('cart_id', $cart->id)
-                ->where('product_id', $product)
-                ->lockForUpdate()
-                ->first();
+        return DB::transaction(function () use ($user, $productId, $quantity) {
+            $cart = $this->getOrCreateCart($user);
 
-            if (!$item) {
+            $existingItem = $this->findCartItem($cart, $productId);
+
+            if (!$existingItem) {
                 throw ValidationException::withMessages(['product_id' => 'Товар отсутствует в корзине.']);
             }
 
-            if ($qtyToRemove < 1) {
-                $item->delete();
+            if ($quantity === null || $quantity >= $existingItem->quantity) {
+                $existingItem->delete();
             } else {
-                $newQty = $item->quantity - $qtyToRemove;
-                if ($newQty <= 0) {
-                    $item->delete();
-                } else {
-                    $item->quantity = $newQty;
-                    $item->save();
-                }
+                $newQuantity = $existingItem->quantity - $quantity;
+                $existingItem->update(['quantity' => $newQuantity]);
             }
 
             return $this->get($user);
         });
     }
 
-    public function clear(User $user): array
+    public function clear(User $user): Cart
     {
         return DB::transaction(function () use ($user) {
-            $cart = Cart::firstOrCreate(['user_id' => $user->id]);
+            $cart = $this->getOrCreateCart($user);
             CartItem::where('cart_id', $cart->id)->delete();
             return $this->get($user);
         });
     }
 
-    private function rubToKop(string $amount): int
+    private function getActiveProduct(int $productId): Product
     {
-        $s = str_replace([' ', "\u{00A0}", ','], ['', '', '.'], trim($amount));
-        $neg = str_starts_with($s, '-');
-        if ($neg) {
-            $s = substr($s, 1);
-        }
-        [$r, $k] = array_pad(explode('.', $s, 2), 2, '0');
-        $r = preg_replace('/\D/', '', $r);
-        $k = substr(preg_replace('/\D/', '', $k) . '00', 0, 2);
-        $v = (int)$r * 100 + (int)$k;
-        return $neg ? -$v : $v;
-    }
+        $product = Product::query()
+            ->whereKey($productId)
+            ->where('is_active', true)
+            ->first();
 
-    private function kopToRub(int $kop): string
-    {
-        $neg = $kop < 0;
-        $kop = abs($kop);
-        return ($neg ? '-' : '') . intdiv($kop, 100) . '.' . str_pad((string)($kop % 100), 2, '0', STR_PAD_LEFT);
-    }
-
-    public function countItemsByType(Cart $cart): array
-    {
-        $cart->load('items.product');
-
-        $counts = [
-            'pizza' => 0,
-            'drink' => 0,
-        ];
-
-        foreach ($cart->items as $item) {
-            $type = $item->product?->type;
-            if ($type && isset($counts[$type])) {
-                $counts[$type] += $item->quantity;
-            }
+        if (!$product) {
+            throw ValidationException::withMessages(['product_id' => 'Товар недоступен.']);
         }
 
-        return $counts;
+        return $product;
+    }
+
+    private function getOrCreateCart(User $user): Cart
+    {
+        return Cart::firstOrCreate(['user_id' => $user->id]);
+    }
+
+    private function findCartItem(Cart $cart, int $productId): ?CartItem
+    {
+        return CartItem::query()
+            ->where('cart_id', $cart->id)
+            ->where('product_id', $productId)
+            ->lockForUpdate()
+            ->first();
+    }
+
+    private function validateQuantityLimit(Cart $cart, string $type, int $newQuantity, int $previousQuantity = 0): void
+    {
+        if (!isset(self::LIMITS[$type])) {
+            return;
+        }
+
+        $cart->loadMissing('items.product');
+
+        $currentCount = $cart->items->reduce(function (int $carry, CartItem $item) use ($type) {
+            return $carry + (
+                $item->product?->type === $type
+                    ? $item->quantity
+                    : 0
+                );
+        }, 0);
+
+        $effectiveTotal = $currentCount - $previousQuantity + $newQuantity;
+
+        if ($effectiveTotal > self::LIMITS[$type]) {
+            throw ValidationException::withMessages([
+                'quantity' => "Максимум " . self::LIMITS[$type] . " {$type} в корзине.",
+            ]);
+        }
     }
 }
