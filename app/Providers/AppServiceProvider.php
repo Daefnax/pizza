@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 
+use App\Models\User;
 use App\Repositories\EloquentProductRepository;
 use App\Repositories\ProductRepositoryInterface;
 use App\Services\CartService;
 use App\Services\Contracts\CartServiceInterface;
+use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
@@ -28,6 +30,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Route::prefix('api')->group(base_path('routes/api.php'));
-        Gate::define('admin', fn ($user) => (bool) $user?->is_admin);
+        Gate::define('admin', static fn (User $user) => (bool) $user->is_admin);
     }
 }

@@ -2,25 +2,51 @@ FROM php:8.3-fpm
 
 WORKDIR "/application"
 
-RUN apt-get update
+# Установка всех необходимых пакетов
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
+    git \
+    openssh-client \
+    nano \
+    libzip-dev \
+    zip \
+    libicu-dev \
+    libpq-dev \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libpng-dev \
+    libsqlite3-dev \
+    libsodium-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install composer
+# Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Install zip+icu dev libs + pgsql dev support
-RUN apt-get install libzip-dev zip libicu-dev libpq-dev -y
+# PHP расширения (включая sodium)
+RUN docker-php-ext-install \
+    zip \
+    bcmath \
+    pdo_sqlite \
+    sodium \
+    && docker-php-ext-configure intl && docker-php-ext-install intl \
+    && docker-php-ext-configure pgsql --with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install pdo_pgsql pgsql \
+    && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
+    && docker-php-ext-install gd
 
-RUN apt-get update && apt-get install -y nano
+# Пользователи и права
+ARG UID=1000
+ARG GID=1000
 
-# Install PHP extensions zip and intl (intl requires to be configured)
-RUN docker-php-ext-install zip && docker-php-ext-configure intl && docker-php-ext-install intl
+RUN groupadd -g ${GID} app \
+    && useradd -u ${UID} -s /bin/bash -d /home/app -m -g app app \
+    && usermod -a -G app www-data
 
-# Add MySQL and Postgres/pgsql support
-RUN docker-php-ext-configure pgsql --with-pgsql=/usr/local/pgsql && docker-php-ext-install pdo_pgsql pgsql
+# Создание каталогов и настройка прав
+RUN mkdir -p /application/storage /application/bootstrap/cache \
+    && chown -R app:app /application \
+    && chmod -R 755 /application
 
-RUN apt-get update && \
-apt-get install -y libfreetype6-dev libjpeg62-turbo-dev libpng-dev && \
-docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ && \
-docker-php-ext-install gd
+USER www-data
 
-RUN docker-php-ext-install bcmath
+CMD ["php-fpm"]

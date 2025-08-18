@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\Product;
+use App\Enums\ProductType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -16,8 +16,9 @@ class IndexProductsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'     => ['nullable', Rule::in(Product::TYPES)],
-            'per_page' => ['integer', 'min:1', 'max:100'],
+            'type'      => ['nullable', Rule::enum(ProductType::class)],
+            'is_active' => ['nullable', 'boolean'],
+            'per_page'  => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 }

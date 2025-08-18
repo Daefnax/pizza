@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\Product;
+use App\Enums\ProductType;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -24,10 +24,10 @@ class UpdateProductsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name'      => ['sometimes','required','string','max:255'],
-            'type'      => ['sometimes','required', Rule::in(Product::TYPES)],
-            'price'     => ['sometimes','required','numeric','min:0'],
-            'is_active' => ['sometimes','required','boolean'],
+            'name'      => ['sometimes', 'required', 'string', 'max:255'],
+            'type'      => ['sometimes', 'required', Rule::enum(ProductType::class)],
+            'price'     => ['sometimes', 'required', 'numeric', 'min:0'],
+            'is_active' => ['sometimes', 'required', 'boolean'],
         ];
     }
 

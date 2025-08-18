@@ -1,0 +1,1007 @@
+{
+	"info": {
+		"_postman_id": "8498101d-a291-4ebe-a385-76466ee298aa",
+		"name": "pizza",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40581082"
+	},
+	"item": [
+		{
+			"name": "admin",
+			"item": [
+				{
+					"name": "orders",
+					"item": [
+						{
+							"name": "index",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU2MDQ2OCwiZXhwIjoxNzU1NTY0MDY4LCJuYmYiOjE3NTU1NjA0NjgsImp0aSI6InhzQnh0MWFoeGVZU1ZBUjkiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.UUxC-pPdhZRQxYUj0Nuxs_4n4FKyFHHqjQM0m_cvz3M",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{pizza}}/api/admin/orders",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"orders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU2MDQ2OCwiZXhwIjoxNzU1NTY0MDY4LCJuYmYiOjE3NTU1NjA0NjgsImp0aSI6InhzQnh0MWFoeGVZU1ZBUjkiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.UUxC-pPdhZRQxYUj0Nuxs_4n4FKyFHHqjQM0m_cvz3M",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{ \r\n    \"status\": \"processing\" \r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/admin/orders/1/status",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"orders",
+										"1",
+										"status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "products",
+					"item": [
+						{
+							"name": "index",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{pizza}}/api/admin/products/",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"products",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "store",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTIwNTM0MywiZXhwIjoxNzU1MjA4OTQzLCJuYmYiOjE3NTUyMDUzNDMsImp0aSI6InU3UkY3eGJscXFZOHh4ajciLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.j-0XEiVieP0RUTzHNE6Hlg7ukliJfcmEo0fZQxKo-Zw",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Гавайская\",\r\n    \"type\": \"pizza\",\r\n    \"price\": 550.00,\r\n    \"is_active\": true\r\n}\r\n"
+								},
+								"url": {
+									"raw": "{{pizza}}/api/admin/products",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"products"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "show",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{pizza}}/api/admin/products/1",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"products",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"price\": 700.00,\r\n  \"is_active\": false,\r\n  \"type\": \"drink\"\r\n}"
+								},
+								"url": {
+									"raw": "{{pizza}}/api/admin/products/1",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"products",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "delete",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									},
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "formdata",
+									"formdata": []
+								},
+								"url": {
+									"raw": "{{pizza}}/api/admin/products/6",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"admin",
+										"products",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "1|LHAKyN4kqBLkkRayTGMueKpJaqJgq4GK1WX67MeObae38161",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		},
+		{
+			"name": "products",
+			"item": [
+				{
+					"name": "index",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{pizza}}/api/products/",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"products",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "show",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTM1NjgwMywiZXhwIjoxNzU1MzYwNDAzLCJuYmYiOjE3NTUzNTY4MDMsImp0aSI6IjBZWnFaRHdOU3VLNWZsZ2UiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.rA8uf3xRQ78tXzZbBxWZ3r08OjjXxPnetja1KEhU5FI",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{pizza}}/api/products/1",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"products",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "cart",
+					"item": [
+						{
+							"name": "show",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE3MjM0MSwiZXhwIjoxNzU1MTc1OTQxLCJuYmYiOjE3NTUxNzIzNDEsImp0aSI6Ikp5RmFhRzZucFZWd2RlMUwiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Vg37YgpvYS23X-H-8eMaDa-MXA2H3cBzgeP-VTUxS-c",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{pizza}}/api/cart",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"cart"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "add",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE3MjM0MSwiZXhwIjoxNzU1MTc1OTQxLCJuYmYiOjE3NTUxNzIzNDEsImp0aSI6Ikp5RmFhRzZucFZWd2RlMUwiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Vg37YgpvYS23X-H-8eMaDa-MXA2H3cBzgeP-VTUxS-c",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"product_id\": 5,\r\n  \"quantity\": 10\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/cart/items",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"cart",
+										"items"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "update",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"product_id\": 5,\r\n  \"quantity\": 2\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/cart/items/5",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"cart",
+										"items",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "remove",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTUwODAxOSwiZXhwIjoxNzU1NTExNjE5LCJuYmYiOjE3NTU1MDgwMTksImp0aSI6IjZQWlNoT0paMkFYQWJaRU8iLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.QSmPw9LrDe_nDDPmjQmjRrNlydnJ--uYuPGxopRylv8",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n \"product_id\": 5,\r\n \"quantity\": 1\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/cart/items/5",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"cart",
+										"items",
+										"5"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "clear",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/cart",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"cart"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"auth": {
+						"type": "bearer",
+						"bearer": [
+							{
+								"key": "token",
+								"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE4Mjg0MywiZXhwIjoxNzU1MTg2NDQzLCJuYmYiOjE3NTUxODI4NDMsImp0aSI6IlhuOTJoTXFUZFFXYm8wSWgiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Z6dADv3EPMN9cZtz1vHO4Tm9e34d1yUXcAGvNvhIhPY",
+								"type": "string"
+							}
+						]
+					},
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"type": "text/javascript",
+								"packages": {},
+								"exec": [
+									""
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "orders",
+					"item": [
+						{
+							"name": "store",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE4Mjg0MywiZXhwIjoxNzU1MTg2NDQzLCJuYmYiOjE3NTUxODI4NDMsImp0aSI6IlhuOTJoTXFUZFFXYm8wSWgiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Z6dADv3EPMN9cZtz1vHO4Tm9e34d1yUXcAGvNvhIhPY",
+											"type": "string"
+										}
+									]
+								},
+								"method": "POST",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"customer_email\": \"test@example.com\",\r\n    \"customer_phone\": \"+79999999999\",\r\n    \"customer_address\": \"г. Москва, ул. Ленина, 1\",\r\n    \"delivery_time\": \"2025-08-15 18:30:00\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{pizza}}/api/orders",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"orders"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "index",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": [
+										{
+											"key": "token",
+											"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTU1OTA0OCwiZXhwIjoxNzU1NTYyNjQ4LCJuYmYiOjE3NTU1NTkwNDgsImp0aSI6IksxRGxhVGtCcXFLajVnSEoiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GwzTL8L4HjYa4OOb6legulK9v3x-qOHVaikb_uZX0fg",
+											"type": "string"
+										}
+									]
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Accept",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{pizza}}/api/orders",
+									"host": [
+										"{{pizza}}"
+									],
+									"path": [
+										"api",
+										"orders"
+									],
+									"query": [
+										{
+											"key": "",
+											"value": null,
+											"disabled": true
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "login",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "email",
+									"value": "admin@admin.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{pizza}}/api/login",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "logout",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE3MjIwOCwiZXhwIjoxNzU1MTc1ODA4LCJuYmYiOjE3NTUxNzIyMDgsImp0aSI6Ik5PVWVBWXZUMm1MMG83VnciLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.GjQjJ0bO9bFdwe8w-Ml-2xLxkP-bTYNpAWigI0uDGAE",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{pizza}}/api/logout",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"logout"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "register",
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Admin",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "admin@admin.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "123456789",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{pizza}}/api/register",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "me",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTIxMzk0NCwiZXhwIjoxNzU1MjE3NTQ0LCJuYmYiOjE3NTUyMTM5NDQsImp0aSI6Iklnbmx5cjlLSldwOWttR1giLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.JyH9sqsX96IYEmGVw0HYaMLgkJkcd91r5U84M1uGm9c",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Admin",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "admin@admin.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "password",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "123456789",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{pizza}}/api/me",
+							"host": [
+								"{{pizza}}"
+							],
+							"path": [
+								"api",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"auth": {
+				"type": "bearer",
+				"bearer": [
+					{
+						"key": "token",
+						"value": "8|gPmqcY9EoWq94xXaeSliLLsvdh0w7CflY0LINgG65d38a4b3",
+						"type": "string"
+					}
+				]
+			},
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"packages": {},
+						"exec": [
+							""
+						]
+					}
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOi8vbG9jYWxob3N0OjkyL2FwaS9sb2dpbiIsImlhdCI6MTc1NTE4Mjg0MywiZXhwIjoxNzU1MTg2NDQzLCJuYmYiOjE3NTUxODI4NDMsImp0aSI6IlhuOTJoTXFUZFFXYm8wSWgiLCJzdWIiOiIxIiwicHJ2IjoiMjNiZDVjODk0OWY2MDBhZGIzOWU3MDFjNDAwODcyZGI3YTU5NzZmNyJ9.Z6dADv3EPMN9cZtz1vHO4Tm9e34d1yUXcAGvNvhIhPY",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "pizza",
+			"value": "http://localhost:92",
+			"type": "default"
+		}
+	]
+}

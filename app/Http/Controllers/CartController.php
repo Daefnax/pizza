@@ -7,6 +7,7 @@ use App\Http\Requests\Cart\CartRemoveItemRequest;
 use App\Http\Requests\Cart\CartUpdateItemRequest;
 use App\Http\Resources\CartResource;
 use App\Services\Contracts\CartServiceInterface;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -15,9 +16,11 @@ class CartController extends Controller
     {
     }
 
-    public function show(Request $request): CartResource
+    public function show(Request $request): JsonResponse
     {
-        return new CartResource($this->cartService->get($request->user()));
+        return (new CartResource(
+            $this->cartService->get($request->user())
+        ))->response()->setStatusCode(200);
     }
 
     public function add(CartAddItemRequest $request): CartResource

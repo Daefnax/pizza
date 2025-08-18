@@ -9,6 +9,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -48,7 +49,7 @@ class OrderService
                 'customer_email' => $validatedData['customer_email'],
                 'customer_phone' => $validatedData['customer_phone'],
                 'customer_address' => $validatedData['customer_address'],
-                'delivery_time' => $validatedData['delivery_time'],
+                'delivery_time' => Carbon::parse($validatedData['delivery_time']),
                 'total' => 0,
             ]);
 
