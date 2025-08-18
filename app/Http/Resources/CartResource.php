@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources;
 
+use App\Enums\ProductType;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -18,36 +19,47 @@ class CartResource extends JsonResource
         $drinkCount = 0;
         $total = '0.00';
 
-        $products = $this->items->map(function ($item) use (&$pizzaCount, &$drinkCount, &$total) {
-            $product = $item->product;
-            $quantity = (int)$item->quantity;
-            $price = (string)$product->price;
-            $subtotal = bcmul($price, (string)$quantity, 2);
+        $products = [];
+
+        foreach ($this->items as $cartItem) {
+            $product = $cartItem->product;
+            $quantity = (int)$cartItem->quantity;
+
+            $unitPrice = (string)($product?->price ?? '0.00');
+            $subtotal = bcmul($unitPrice, (string)$quantity, 2);
             $total = bcadd($total, $subtotal, 2);
 
-            match ($product->type) {
-                'pizza' => $pizzaCount += $quantity,
-                'drink' => $drinkCount += $quantity,
-            };
+            $typeEnum = $product?->type;
 
-            return [
-                'id' => $product->id,
-                'name' => $product->name,
-                'type' => $product->type,
-                'price' => number_format($price, 2, '.', ''),
+            if ($typeEnum === ProductType::Pizza) {
+                $pizzaCount += $quantity;
+            } elseif ($typeEnum === ProductType::Drink) {
+                $drinkCount += $quantity;
+            }
+
+            $products[] = [
+                'id' => $product?->id,
+                'name' => $product?->name,
+                'type' => $typeEnum?->value,
+                'price' => number_format($unitPrice, 2, '.', ''),
                 'quantity' => $quantity,
                 'subtotal' => number_format($subtotal, 2, '.', ''),
             ];
-        });
+        }
 
         return [
             'id' => $this->id,
             'user_id' => $this->user_id,
-            'products' => $products->values(),
+            'products' => $products,
+            'limits' => [
+                'pizza_max' => config('cart.limits.' . ProductType::Pizza->value),
+                'drink_max' => config('cart.limits.' . ProductType::Drink->value),
+                'pizza_in_cart' => $pizzaCount,
+                'drink_in_cart' => $drinkCount,
+            ],
             'total' => number_format($total, 2, '.', ''),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];
     }
-
 }

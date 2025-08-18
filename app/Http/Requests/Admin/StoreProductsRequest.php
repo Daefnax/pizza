@@ -13,7 +13,7 @@ class StoreProductsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return (bool)$this->user()?->can('admin');
+        return (bool) $this->user()?->is_admin;
     }
 
     /**

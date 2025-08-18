@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +15,8 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->restrictOnDelete();
-            $table->string('status')->default('pending');
+            $table->enum('status', array_column(OrderStatus::cases(), 'value'))
+                ->default(OrderStatus::Pending->value);
             $table->string('customer_email');
             $table->string('customer_phone');
             $table->string('customer_address');

@@ -2,48 +2,49 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\OrderStatus;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\OrderIndexRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
+use App\Http\Resources\OrderResource;
 use App\Models\Order;
+use App\Services\OrderReadService;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class OrderController extends Controller
 {
-    public function index(Request $request): JsonResponse
+    public function __construct(private OrderReadService $orderReadService)
     {
-        $status = $request->query('status');
-        $perPage = (int) $request->query('per_page', 20);
+    }
 
-        $query = Order::query()
-            ->with('items.product')
-            ->latest('id');
+    public function index(OrderIndexRequest $request): JsonResponse
+    {
+        $status = $request->validated('status');
+        $perPage = (int)($request->validated('per_page') ?? 20);
 
-        if ($status !== null) {
-            $query->where('status', $status);
-        }
+        $paginator = $this->orderReadService->paginateForAdmin($status, $perPage);
 
-        $orders = $query->paginate($perPage);
-
-        return response()->json($orders);
+        return OrderResource::collection($paginator)->response();
     }
 
     public function updateStatus(OrderStatusUpdateRequest $request, int $order): JsonResponse
     {
-        $model = Order::query()->with('items.product')->findOrFail($order);
+        $model = Order::query()
+            ->with('items.product')
+            ->findOrFail($order);
 
-        $newStatus = $request->validated('status');
+        $newStatus = $request->enum('status', OrderStatus::class);
 
         if (method_exists($model, 'canTransitionTo') && !$model->canTransitionTo($newStatus)) {
             return response()->json([
                 'message' => 'Недопустимый переход статуса.',
-                'errors'  => ['status' => ['Недопустимый переход статуса.']],
+                'errors' => ['status' => ['Недопустимый переход статуса.']],
             ], 422);
         }
 
         $model->status = $newStatus;
         $model->save();
 
-        return response()->json($model);
+        return (new OrderResource($model))->response();
     }
 }

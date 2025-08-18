@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ProductType;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
@@ -12,11 +13,6 @@ use Illuminate\Validation\ValidationException;
 
 class CartService implements CartServiceInterface
 {
-    private const LIMITS = [
-        'pizza' => 10,
-        'drink' => 20,
-    ];
-
     public function get(User $user): Cart
     {
         return Cart::with('items.product')->firstOrCreate(['user_id' => $user->id]);
@@ -30,6 +26,7 @@ class CartService implements CartServiceInterface
 
         return DB::transaction(function () use ($user, $productId, $quantity) {
             $product = $this->getActiveProduct($productId);
+            $type = $product->type;
 
             $cart = $this->getOrCreateCart($user);
 
@@ -39,7 +36,7 @@ class CartService implements CartServiceInterface
 
             $this->validateQuantityLimit(
                 cart: $cart,
-                type: $product->type,
+                type: $type,
                 newQuantity: $newQuantity,
                 previousQuantity: $currentQuantity
             );
@@ -77,10 +74,11 @@ class CartService implements CartServiceInterface
                 $existingItem->delete();
             } else {
                 $product = $this->getActiveProduct($productId);
+                $type = $product->type;
 
                 $this->validateQuantityLimit(
                     cart: $cart,
-                    type: $product->type,
+                    type: $type,
                     newQuantity: $quantity,
                     previousQuantity: $existingItem->quantity
                 );
@@ -91,7 +89,6 @@ class CartService implements CartServiceInterface
             return $this->get($user);
         });
     }
-
 
     public function remove(User $user, int $productId, ?int $quantity = null): Cart
     {
@@ -152,27 +149,27 @@ class CartService implements CartServiceInterface
             ->first();
     }
 
-    private function validateQuantityLimit(Cart $cart, string $type, int $newQuantity, int $previousQuantity = 0): void
+    private function validateQuantityLimit(Cart $cart, ProductType $type, int $newQuantity, int $previousQuantity = 0): void
     {
-        if (!isset(self::LIMITS[$type])) {
+        $limits = config('cart.limits');
+
+        if (!isset($limits[$type->value])) {
             return;
         }
 
         $cart->loadMissing('items.product');
 
-        $currentCount = $cart->items->reduce(function (int $carry, CartItem $item) use ($type) {
-            return $carry + (
-                $item->product?->type === $type
-                    ? $item->quantity
-                    : 0
-                );
-        }, 0);
+        $currentCount = $cart->items->reduce(
+            fn(int $carry, CartItem $item) =>
+                $carry + ($item->product?->type === $type ? $item->quantity : 0),
+            0
+        );
 
         $effectiveTotal = $currentCount - $previousQuantity + $newQuantity;
 
-        if ($effectiveTotal > self::LIMITS[$type]) {
+        if ($effectiveTotal > $limits[$type->value]) {
             throw ValidationException::withMessages([
-                'quantity' => "Максимум " . self::LIMITS[$type] . " {$type} в корзине.",
+                'quantity' => "Максимум {$limits[$type->value]} {$type->value} в корзине.",
             ]);
         }
     }

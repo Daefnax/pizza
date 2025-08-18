@@ -2,11 +2,11 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\Product;
+use App\Enums\OrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
-class IndexProductsRequest extends FormRequest
+class OrderIndexRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -16,8 +16,8 @@ class IndexProductsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'type'     => ['nullable', Rule::in(Product::TYPES)],
-            'per_page' => ['integer', 'min:1', 'max:100'],
+            'status'   => ['nullable', new Enum(OrderStatus::class)],
+            'per_page' => ['nullable', 'integer', 'min:1', 'max:100'],
         ];
     }
 }

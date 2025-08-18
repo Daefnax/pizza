@@ -2,9 +2,9 @@
 
 namespace App\Http\Requests\Admin;
 
-use App\Models\Order;
+use App\Enums\OrderStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
 class OrderStatusUpdateRequest extends FormRequest
 {
@@ -16,11 +16,7 @@ class OrderStatusUpdateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => [
-                'required',
-                'string',
-                Rule::in(Order::ALLOWED),
-            ],
+            'status' => ['required', new Enum(OrderStatus::class)],
         ];
     }
 
