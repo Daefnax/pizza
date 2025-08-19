@@ -3,17 +3,20 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
+use App\Exceptions\InvalidOrderStatusTransitionException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderIndexRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\OrderReadService;
+use App\Services\OrderWriteService;
 use Illuminate\Http\JsonResponse;
 
 class OrderController extends Controller
 {
-    public function __construct(private OrderReadService $orderReadService)
+    public function __construct(private OrderReadService  $orderReadService,
+                                private OrderWriteService $orderWriteService)
     {
     }
 
@@ -29,21 +32,16 @@ class OrderController extends Controller
 
     public function updateStatus(OrderStatusUpdateRequest $request, int $order): JsonResponse
     {
-        $model = Order::query()
-            ->with('items.product')
-            ->findOrFail($order);
-
         $newStatus = $request->enum('status', OrderStatus::class);
 
-        if (method_exists($model, 'canTransitionTo') && !$model->canTransitionTo($newStatus)) {
+        try {
+            $model = $this->orderWriteService->updateStatus($order, $newStatus);
+        } catch (InvalidOrderStatusTransitionException $e) {
             return response()->json([
-                'message' => 'Недопустимый переход статуса.',
-                'errors' => ['status' => ['Недопустимый переход статуса.']],
+                'message' => $e->getMessage(),
+                'errors' => $e->getErrors(),
             ], 422);
         }
-
-        $model->status = $newStatus;
-        $model->save();
 
         return (new OrderResource($model))->response();
     }
