@@ -6,14 +6,14 @@ use App\Http\Requests\Cart\CartAddItemRequest;
 use App\Http\Requests\Cart\CartRemoveItemRequest;
 use App\Http\Requests\Cart\CartUpdateItemRequest;
 use App\Http\Resources\CartResource;
-use App\Services\Contracts\CartServiceInterface;
+use App\Services\CartService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends Controller
 {
-    public function __construct(private CartServiceInterface $cartService)
+    public function __construct(private CartService $cartService)
     {
     }
 

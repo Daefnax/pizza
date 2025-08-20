@@ -7,11 +7,10 @@ use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Product;
 use App\Models\User;
-use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
-class CartService implements CartServiceInterface
+class CartService
 {
     public function get(User $user): Cart
     {

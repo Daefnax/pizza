@@ -8,13 +8,13 @@ use App\Http\Requests\Admin\IndexProductsRequest;
 use App\Http\Requests\Admin\StoreProductsRequest;
 use App\Http\Requests\Admin\UpdateProductsRequest;
 use App\Http\Resources\ProductResource;
-use App\Repositories\ProductRepositoryInterface;
+use App\Repositories\EloquentProductRepository;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class ProductController extends Controller
 {
-    public function __construct(private ProductRepositoryInterface $productRepository)
+    public function __construct(private EloquentProductRepository $productRepository)
     {
     }
 

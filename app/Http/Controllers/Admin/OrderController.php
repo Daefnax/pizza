@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\OrderStatus;
-use App\Exceptions\InvalidOrderStatusTransitionException;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderIndexRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
