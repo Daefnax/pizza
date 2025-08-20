@@ -8,7 +8,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\OrderIndexRequest;
 use App\Http\Requests\Admin\OrderStatusUpdateRequest;
 use App\Http\Resources\OrderResource;
-use App\Models\Order;
 use App\Services\OrderReadService;
 use App\Services\OrderWriteService;
 use Illuminate\Http\JsonResponse;
@@ -34,14 +33,7 @@ class OrderController extends Controller
     {
         $newStatus = $request->enum('status', OrderStatus::class);
 
-        try {
-            $model = $this->orderWriteService->updateStatus($order, $newStatus);
-        } catch (InvalidOrderStatusTransitionException $e) {
-            return response()->json([
-                'message' => $e->getMessage(),
-                'errors' => $e->getErrors(),
-            ], 422);
-        }
+        $model = $this->orderWriteService->updateStatus($order, $newStatus);
 
         return (new OrderResource($model))->response();
     }

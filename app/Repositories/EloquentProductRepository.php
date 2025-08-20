@@ -7,7 +7,7 @@ use App\Models\Product;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
-class EloquentProductRepository implements ProductRepositoryInterface
+    class EloquentProductRepository implements ProductRepositoryInterface
 {
     public function paginate(?string $type = null, int $perPage = 20): LengthAwarePaginator
     {

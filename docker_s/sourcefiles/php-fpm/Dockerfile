@@ -19,10 +19,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libsodium-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# PHP расширения (включая sodium)
 RUN docker-php-ext-install \
     zip \
     bcmath \
@@ -33,6 +31,7 @@ RUN docker-php-ext-install \
     && docker-php-ext-install pdo_pgsql pgsql \
     && docker-php-ext-configure gd --with-freetype=/usr/include/ --with-jpeg=/usr/include/ \
     && docker-php-ext-install gd
+
 
 # Пользователи и права
 ARG UID=1000
