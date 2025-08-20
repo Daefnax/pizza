@@ -28,10 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');{}
-        Schema::table('products', function (Blueprint $table) {
-            $table->dropIndex(['is_active']);
-            $table->dropColumn('is_active');
-        });
+        Schema::dropIfExists('products');
     }
 };
