@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\OrderStatus;
 use App\Models\Product;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AdminOrdersTest extends TestCase
@@ -11,12 +12,12 @@ class AdminOrdersTest extends TestCase
     public function test_admin_orders_index_success(): void
     {
         $admin = $this->adminUser();
-        $this->authJson('GET', '/api/admin/orders', [], $admin)->assertStatus(200);
+        $this->authJson('GET', '/api/admin/orders', [], $admin)->assertStatus(Response::HTTP_OK);
     }
 
     public function test_admin_orders_index_forbidden_for_user(): void
     {
-        $this->authJson('GET', '/api/admin/orders')->assertStatus(403);
+        $this->authJson('GET', '/api/admin/orders')->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_admin_update_status_success(): void
@@ -52,6 +53,6 @@ class AdminOrdersTest extends TestCase
 
         $this->authJson('PATCH', '/api/admin/orders/999999/status', [
             'status' => 'unknown',
-        ], $admin)->assertStatus(422);
+        ], $admin)->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 }

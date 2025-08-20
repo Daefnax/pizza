@@ -8,6 +8,7 @@ use App\Services\OrderReadService;
 use App\Services\OrderService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class OrderController extends Controller
 {
@@ -29,6 +30,6 @@ class OrderController extends Controller
             $request->validated()
         );
 
-        return (new OrderResource($order))->response()->setStatusCode(201);
+        return (new OrderResource($order))->response()->setStatusCode(Response::HTTP_CREATED);
     }
 }

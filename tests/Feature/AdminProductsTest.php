@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AdminProductsTest extends TestCase
@@ -12,13 +13,13 @@ class AdminProductsTest extends TestCase
         $admin = $this->adminUser();
 
         $this->authJson('GET', '/api/admin/products', [], $admin)
-            ->assertStatus(200);
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_admin_products_index_forbidden_for_user(): void
     {
         $this->authJson('GET', '/api/admin/products')
-            ->assertStatus(403);
+            ->assertStatus(Response::HTTP_FORBIDDEN);
     }
 
     public function test_admin_products_store_success(): void
@@ -33,7 +34,7 @@ class AdminProductsTest extends TestCase
         ];
 
         $this->authJson('POST', '/api/admin/products', $payload, $admin)
-            ->assertStatus(201)
+            ->assertStatus(Response::HTTP_CREATED)
             ->assertJsonStructure(['data'=>['id','name','type','price']]);
     }
 
@@ -42,7 +43,7 @@ class AdminProductsTest extends TestCase
         $admin = $this->adminUser();
 
         $this->authJson('POST', '/api/admin/products', [], $admin)
-            ->assertStatus(422);
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     public function test_admin_products_show_and_update_destroy(): void
@@ -51,25 +52,25 @@ class AdminProductsTest extends TestCase
         $product = Product::factory()->create();
 
         $this->authJson('GET', "/api/admin/products/{$product->id}", [], $admin)
-            ->assertStatus(200);
+            ->assertStatus(Response::HTTP_OK);
 
         $this->authJson('PUT', "/api/admin/products/{$product->id}", [
             'name'  => 'Updated',
             'type'  => 'drink',
             'price' => '49.99',
             'is_active' => true,
-        ], $admin)->assertStatus(200);
+        ], $admin)->assertStatus(Response::HTTP_OK);
 
         $this->authJson('PATCH', "/api/admin/products/{$product->id}/toggle", [], $admin)
-            ->assertStatus(200);
+            ->assertStatus(Response::HTTP_OK);
 
         $this->authJson('DELETE', "/api/admin/products/{$product->id}", [], $admin)
-            ->assertStatus(200);
+            ->assertStatus(Response::HTTP_OK);
     }
 
     public function test_admin_products_show_not_found(): void
     {
         $admin = $this->adminUser();
-        $this->authJson('GET', '/api/admin/products/999999', [], $admin)->assertStatus(404);
+        $this->authJson('GET', '/api/admin/products/999999', [], $admin)->assertStatus(Response::HTTP_NOT_FOUND);
     }
 }

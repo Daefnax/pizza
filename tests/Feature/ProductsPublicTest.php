@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Product;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class ProductsPublicTest extends TestCase
@@ -12,7 +13,7 @@ class ProductsPublicTest extends TestCase
         Product::factory()->count(3)->create();
 
         $this->json('GET', '/api/products')
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['data']);
     }
 
@@ -21,13 +22,13 @@ class ProductsPublicTest extends TestCase
         $product = Product::factory()->create();
 
         $this->json('GET', "/api/products/{$product->id}")
-            ->assertStatus(200)
+            ->assertStatus(Response::HTTP_OK)
             ->assertJsonStructure(['data']);
     }
 
     public function test_products_show_not_found(): void
     {
         $this->json('GET', '/api/products/999999')
-            ->assertStatus(404);
+            ->assertStatus(Response::HTTP_NOT_FOUND);
     }
 }

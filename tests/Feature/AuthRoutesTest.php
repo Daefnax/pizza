@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\User;
+use Symfony\Component\HttpFoundation\Response;
 use Tests\TestCase;
 
 class AuthRoutesTest extends TestCase
@@ -17,14 +18,14 @@ class AuthRoutesTest extends TestCase
         ];
 
         $this->json('POST', '/api/register', $payload)
-            ->assertStatus(201)
+            ->assertStatus(Response::HTTP_CREATED)
             ->assertJsonStructure(['user','token']);
     }
 
     public function test_register_post_validation_error(): void
     {
         $this->json('POST', '/api/register', [])
-            ->assertStatus(422)
+            ->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY)
             ->assertJsonValidationErrors(['email','password']);
     }
 
@@ -35,7 +36,7 @@ class AuthRoutesTest extends TestCase
         $this->json('POST', '/api/login', [
             'email'    => 'u@example.com',
             'password' => 'password',
-        ])->assertStatus(200)->assertJsonStructure(['token']);
+        ])->assertStatus(Response::HTTP_OK)->assertJsonStructure(['token']);
     }
 
     public function test_login_post_invalid_credentials(): void
@@ -43,6 +44,6 @@ class AuthRoutesTest extends TestCase
         $this->json('POST', '/api/login', [
             'email'    => 'nope@example.com',
             'password' => 'wrong',
-        ])->assertStatus(401);
+        ])->assertStatus(Response::HTTP_UNAUTHORIZED);
     }
 }

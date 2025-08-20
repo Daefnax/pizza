@@ -9,6 +9,7 @@ use App\Http\Resources\CartResource;
 use App\Services\Contracts\CartServiceInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class CartController extends Controller
 {
@@ -20,7 +21,7 @@ class CartController extends Controller
     {
         return (new CartResource(
             $this->cartService->get($request->user())
-        ))->response()->setStatusCode(200);
+        ))->response()->setStatusCode(Response::HTTP_OK);
     }
 
     public function add(CartAddItemRequest $request): CartResource

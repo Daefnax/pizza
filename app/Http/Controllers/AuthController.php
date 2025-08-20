@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -28,7 +29,7 @@ class AuthController extends Controller
         return response()->json([
             'token' => $token,
             'user' => new UserResource($user)
-        ], 201);
+        ], Response::HTTP_CREATED);
     }
 
     public function login(LoginRequest $request): JsonResponse
