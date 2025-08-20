@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\DTO\IndexProductsDTO;
 use App\Enums\ProductType;
-use App\Models\Product;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -21,5 +21,13 @@ class IndexProductsRequest extends FormRequest
             'is_active' => ['nullable', 'boolean'],
             'per_page' => ['integer|min:1|max:100']
         ];
+    }
+
+    public function toDTO(): IndexProductsDTO
+    {
+        return new IndexProductsDTO(
+            type: $this->validated('type'),
+            perPage: (int)($this->validated('per_page') ?? 20),
+        );
     }
 }
